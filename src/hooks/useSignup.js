@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { auth } from '../firebase/config';
 import { useAuthContext } from '../hooks/useAuthContext';
 import {
@@ -10,7 +9,7 @@ import {
 export function useSignup() {
   const [error, setError] = useState(null);
   const [isPending, setIsPending] = useState(false);
-  const navigate = useNavigate();
+  const [isCancelled, setIsCancelled] = useState(false);
   const { dispatch } = useAuthContext();
 
   async function signup(email, password, displayName) {
@@ -26,15 +25,25 @@ export function useSignup() {
 
       if (!response) throw new Error('Could not complete signup');
 
-      updateProfile(response.user, { displayName });
+      await updateProfile(response.user, { displayName });
       dispatch({ type: 'LOGIN', payload: response.user });
-      setIsPending(false);
-      navigate('/');
+
+      // update state
+      if (!isCancelled) {
+        setIsPending(false);
+      }
     } catch (error) {
-      setError(error.message);
-      setIsPending(false);
+      if (!isCancelled) {
+        setError(error.message);
+        setIsPending(false);
+      }
     }
   }
+
+  // Cleanup functionality
+  useEffect(() => {
+    return () => setIsCancelled(true);
+  }, []);
 
   return { signup, error, isPending };
 }
