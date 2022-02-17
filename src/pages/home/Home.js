@@ -1,9 +1,13 @@
-// import styles from './Home.module.css';
-import { useAuthContext } from '../../hooks/useAuthContext';
+import TransactionForm from './TransactionForm';
+import styles from './Home.module.css';
 
 export default function Home() {
-  const context = useAuthContext();
-  console.log(context);
-
-  return <div>Home</div>;
+  return (
+    <main className={styles.container}>
+      <section className={styles.content}>transactions list</section>
+      <aside className={styles.sidebar}>
+        <TransactionForm />
+      </aside>
+    </main>
+  );
 }
