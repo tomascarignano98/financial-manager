@@ -9,9 +9,6 @@ export default function Login() {
 
   function handleSubmit(e) {
     e.preventDefault();
-
-    setEmail('');
-    setPassword('');
     login(email, password);
   }
 
@@ -39,7 +36,7 @@ export default function Login() {
           loading...
         </button>
       ) : (
-        <button className="btn">Signup</button>
+        <button className="btn">Login</button>
       )}
       {error && <p>{error}</p>}
     </form>
