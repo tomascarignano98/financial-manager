@@ -7,7 +7,7 @@ import {
   deleteDoc,
   getDoc,
   Timestamp,
-} from 'firebase/firestore/lite';
+} from 'firebase/firestore';
 
 export function useFirestore(collectionName) {
   const [state, dispatch] = useReducer(reducer, initialState);
