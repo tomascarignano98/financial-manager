@@ -5,52 +5,10 @@ import {
   addDoc,
   collection,
   deleteDoc,
-  getDoc,
+  doc,
   Timestamp,
 } from 'firebase/firestore';
 
-export function useFirestore(collectionName) {
-  const [state, dispatch] = useReducer(reducer, initialState);
-  const [isMounted, setIsMounted] = useState(false);
-  const { user } = useAuthContext();
-  const collectionRef = collection(db, collectionName);
-
-  async function addDocument(docData) {
-    dispatch({ type: 'IS_PENDING' });
-
-    try {
-      const doc = {
-        ...docData,
-        createdAt: Timestamp.now(),
-        uid: user.uid,
-      };
-      const addedDocRef = await addDoc(collectionRef, doc);
-
-      if (addedDocRef) dispatchIfMounted({ type: 'ADDED', payload: doc });
-    } catch (error) {
-      dispatchIfMounted({ type: 'ERROR', payload: error.message });
-    }
-  }
-
-  function deleteDocument(id) {
-    deleteDoc(getDoc(id));
-  }
-
-  // safely update state
-  function dispatchIfMounted(action) {
-    if (isMounted) dispatch(action);
-  }
-
-  // cancel any local state updates if component will unmount
-  useEffect(() => {
-    setIsMounted(true);
-    return () => setIsMounted(false);
-  }, []);
-
-  return { addDocument, deleteDocument, response: state };
-}
-
-// ----------------------------------------------
 const initialState = {
   document: null,
   isPending: false,
@@ -75,6 +33,14 @@ function reducer(state, action) {
         success: true,
       };
 
+    case 'DELETED':
+      return {
+        document: null,
+        isPending: false,
+        error: null,
+        success: true,
+      };
+
     case 'ERROR':
       console.log('error in useFirestore!');
       return {
@@ -87,4 +53,55 @@ function reducer(state, action) {
     default:
       return state;
   }
+}
+
+export function useFirestore(collectionName) {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const [isMounted, setIsMounted] = useState(false);
+  const { user } = useAuthContext();
+
+  const collectionRef = collection(db, collectionName);
+
+  // add a document
+  async function addDocument(docData) {
+    dispatch({ type: 'IS_PENDING' });
+
+    try {
+      const doc = {
+        ...docData,
+        createdAt: Timestamp.now(),
+        uid: user.uid,
+      };
+      const addedDocRef = await addDoc(collectionRef, doc);
+
+      if (addedDocRef) dispatchIfMounted({ type: 'ADDED', payload: doc });
+    } catch (error) {
+      dispatchIfMounted({ type: 'ERROR', payload: error.message });
+    }
+  }
+
+  // delete a document
+  async function deleteDocument(id) {
+    dispatch({ type: 'IS_PENDING' });
+
+    try {
+      await deleteDoc(doc(db, collectionName, id));
+      dispatchIfMounted({ type: 'DELETED' });
+    } catch (error) {
+      dispatchIfMounted({ type: 'ERROR', payload: error.message });
+    }
+  }
+
+  // cancel any local state updates if component will unmount
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
+
+  // safely update state
+  function dispatchIfMounted(action) {
+    if (isMounted) dispatch(action);
+  }
+
+  return { addDocument, deleteDocument, response: state };
 }

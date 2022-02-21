@@ -97,9 +97,15 @@
   background: #ddd;
   color: #777;
   border: none;
+  border-radius: 0 0 0 5px;
   padding: 12px 8px;
   text-align: center;
   line-height: 0;
   font-size: 0.9em;
   cursor: pointer;
+}
+
+.transactions button:hover {
+  background: #9e0000;
+  color: #fff;
 }
