@@ -14,16 +14,13 @@ export function useLogin() {
     setIsPending(true);
 
     try {
-      const response = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
+      const response = await signInWithEmailAndPassword(auth, email, password);
       dispatch({ type: 'LOGIN', payload: response.user });
 
-      // update state
+      // safely update state
       if (!isCancelled) {
         setIsPending(false);
+        setError(null);
       }
     } catch (error) {
       if (!isCancelled) {
@@ -33,7 +30,7 @@ export function useLogin() {
     }
   }
 
-  // Cleanup functionality
+  // Prevent state from being updated on unmount with cleanup function
   useEffect(() => {
     return () => setIsCancelled(true);
   }, []);

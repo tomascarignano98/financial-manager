@@ -4,7 +4,7 @@ import {
   onSnapshot,
   query,
   where,
-  orderBy,
+  orderBy
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useAuthContext } from './useAuthContext';
@@ -23,7 +23,7 @@ export function useQuery(collectionName) {
       orderBy('createdAt', 'desc')
     );
 
-    const unsub = onSnapshot(
+    const unsubscribe = onSnapshot(
       q,
       (querySnapshot) => {
         if (querySnapshot.empty) return setDocuments([]);
@@ -42,7 +42,7 @@ export function useQuery(collectionName) {
       }
     );
 
-    return unsub;
+    return () => unsubscribe();
   }, [collectionName, user.uid]);
 
   return { documents, error };

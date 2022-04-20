@@ -23,18 +23,16 @@ function reducer(state, action) {
 function AuthContextProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, {
     user: null,
-    authIsReady: false,
+    authIsReady: false
   });
 
   // Check ONCE if user is logged in when the app first renders
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) =>
+    const unsubscribe = onAuthStateChanged(auth, (user) =>
       dispatch({ type: 'AUTH_IS_READY', payload: user })
     );
-    unsub();
 
-    // unnecessary but just in case unsub() doesn't execute for some reason
-    return unsub;
+    return () => unsubscribe();
   }, []);
 
   return (

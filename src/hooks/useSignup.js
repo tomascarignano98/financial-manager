@@ -1,10 +1,7 @@
 import { useState, useEffect } from 'react';
 import { auth } from '../firebase/config';
 import { useAuthContext } from '../hooks/useAuthContext';
-import {
-  createUserWithEmailAndPassword,
-  updateProfile,
-} from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 
 export function useSignup() {
   const [error, setError] = useState(null);
@@ -28,9 +25,10 @@ export function useSignup() {
       await updateProfile(response.user, { displayName });
       dispatch({ type: 'LOGIN', payload: response.user });
 
-      // update state
+      // safely update state
       if (!isCancelled) {
         setIsPending(false);
+        setError(null);
       }
     } catch (error) {
       if (!isCancelled) {
@@ -40,10 +38,19 @@ export function useSignup() {
     }
   }
 
-  // Cleanup functionality
+  // Prevent state from being updated on unmount with cleanup function
   useEffect(() => {
     return () => setIsCancelled(true);
   }, []);
 
   return { signup, error, isPending };
 }
+
+/* 
+We'll still get the user in the global state, that's absolutely fine,
+so we're still technically signing up, but now we don't get the "can't perform a 
+React state update on an unmounted component. It indicates a leak in your app." error.
+The cleanup function sets isCancelled to true, and when that's true we don't try to 
+update state in our component.
+
+*/
