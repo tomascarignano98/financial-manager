@@ -32,7 +32,10 @@ function AuthContextProvider({ children }) {
       dispatch({ type: 'AUTH_IS_READY', payload: user })
     );
 
-    return () => unsubscribe();
+    // No need to keep on listening for auth state changes
+    unsubscribe();
+
+    // return () => unsubscribe();
   }, []);
 
   return (
