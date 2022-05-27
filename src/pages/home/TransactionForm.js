@@ -37,7 +37,7 @@ export default function TransactionForm() {
           <input
             type="number"
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={(e) => setAmount(e.target.valueAsNumber)}
             required
           />
         </label>
